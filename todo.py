@@ -210,7 +210,7 @@ def build_tasks(filename):
         content =  json.load(tasks_db)
         task_list = content.get('tasks', [])
         if not task_list:
-            print('You Shouldnt Even Be Here... How did You Bypass The Errors')
+            print(f"\033[97mYour Database is Empty! Add Tasks With \033[95m'-at'\033[97m or Read The TLDR\033[0m")
             exit()
         task_len = 0 # so spacing can be evenly made
         priority_len = 0 #for spacing
@@ -230,41 +230,54 @@ def build_tasks(filename):
         spacing_const_task = task_len + 5
         spacing_const_prio = priority_len + 5
         spacing_const_stat = status_len + 3
+        none = []
         low = []
         med = []
         high = []
+        completed = []
         total = 0
         for tasks in task_list:
             total +=1
-            priority = color_attr(tasks['priority'])
-            status = color_attr(tasks['status'])
+            priority = tasks['priority']
+            status = tasks['status']
             task_space = spacing_const_task - len(tasks['taskname'])
             prio_space = spacing_const_prio - len(tasks['priority'])
             stat_space = spacing_const_stat - len(tasks['status'])
             if tasks['filelink'] == None:
-                filelink = f'\033[36mNo Links'
+                filelink = f'No Links'
             else:
-                filelink = f'\033[36m{tasks['filelink']}'
+                filelink = f'{tasks['filelink']}'
             if len(str(tasks['id'])) == 1:
                 id_space = 4
             else:
                 id_space = 3
-            #if tasks['status'] == 'Completed':
-            #    result = f'\033[9m\033[31m{tasks['id']}{id_space * " "}\033[97m{tasks['taskname']}{task_space * " "}{priority}{prio_space * " "}{status}{stat_space * " "}{filelink}\033[0m'
-            #else:
-            result = f'\033[31m{tasks['id']}{id_space * " "}\033[97m{tasks['taskname']}{task_space * " "}{priority}{prio_space * " "}{status}{stat_space * " "}{filelink}\033[0m'
-            if tasks['priority'] == 'High':
+            if tasks['status'] == 'Completed':
+                result = f'\033[9m\033[90m{tasks['id']}{id_space * " "}{tasks['taskname']}{task_space * " "}{priority}{prio_space * " "}{status}{stat_space * " "}{filelink}\033[0m'
+            else:
+                priority = color_attr(tasks['priority'])
+                status = color_attr(tasks['status'])
+                result = f'\033[31m{tasks['id']}{id_space * " "}\033[97m{tasks['taskname']}{task_space * " "}{priority}{prio_space * " "}{status}{stat_space * " "}\033[36m{filelink}\033[0m'
+            if tasks['status'] == 'Completed':
+                completed.append(result)
+            elif tasks['priority'] == 'High':
                 high.append(result)
             elif tasks['priority'] == 'Medium':
                 med.append(result)
             elif tasks['priority'] == 'Low':
                 low.append(result) 
-        formation = high + med + low
+            elif tasks['priority'] == 'None':
+                none.append(result)
+        formation = high + med + low + none + completed
         print(f'total: {total}')
         print(f'\033[4mID\033[0m{(id_space-1) * " "}\033[4mTask Name\033[0m{(task_len-4 ) * " "}\033[4mPriority\033[0m{(priority_len-3) * " "}\033[4mStatus\033[0m{(status_len-3) * " "}\033[4mComLinks\033[0m')
         for lines in formation:
             print(lines)
         return formation
+
+def remove_task(filename,id):
+    with open(filename,'r') as file_db:
+        pass
+
 
 def main():
     if len(sys.argv) < 2:
